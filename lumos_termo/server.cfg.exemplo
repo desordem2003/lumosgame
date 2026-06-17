@@ -1,0 +1,15 @@
+# Permissões do Lumos Termo
+# Adicione estas linhas ao seu server.cfg
+
+# Inicia o recurso
+ensure lumos_termo
+
+# Cria o grupo admin (se ainda não existir)
+add_ace group.admin command allow
+
+# Permite que o grupo admin use o painel do Lumos Termo
+add_ace group.admin lumos_termo.admin allow
+
+# Adicione jogadores ao grupo admin pelo identificador Steam/License
+# Substitua "steam:xxxxx" pelo identificador real do admin
+add_principal identifier.steam:xxxxx group.admin

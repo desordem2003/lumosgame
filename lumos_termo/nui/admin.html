@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lumos Admin</title>
+    <!--
+        admin.html — Painel Administrativo do Lumos Termo
+        Permite adicionar, remover e listar palavras do banco de dados.
+        Carregado em um iframe dentro do index.html.
+    -->
+    <style>
+        :root {
+            --cor-fundo: #0d0a1a;
+            --cor-painel: #1a1225;
+            --cor-borda: #3d2b5e;
+            --cor-dourado: #d4a017;
+            --cor-dourado-hover: #f0c030;
+            --cor-texto: #f5e6c8;
+            --cor-texto-suave: #a89070;
+            --cor-correto: #3a7d44;
+            --cor-erro: #8b2020;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--cor-fundo);
+            color: var(--cor-texto);
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--cor-borda);
+            background: var(--cor-painel);
+            flex-shrink: 0;
+        }
+
+        .admin-titulo {
+            font-size: 16px;
+            color: var(--cor-dourado);
+            letter-spacing: 3px;
+            font-variant: small-caps;
+        }
+
+        .btn-fechar-admin {
+            background: transparent;
+            border: 1px solid var(--cor-borda);
+            color: var(--cor-texto-suave);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-fechar-admin:hover { border-color: var(--cor-dourado); color: var(--cor-dourado); }
+
+        .admin-corpo {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .painel-controles {
+            width: 260px;
+            flex-shrink: 0;
+            padding: 16px;
+            border-right: 1px solid var(--cor-borda);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .painel-lista {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .secao-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--cor-texto-suave);
+            margin-bottom: 4px;
+        }
+
+        .input-palavra {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--cor-painel);
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            color: var(--cor-texto);
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-palavra:focus { border-color: var(--cor-dourado); }
+
+        .btn-admin {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 1px;
+        }
+
+        .btn-adicionar { background: var(--cor-correto); border: none; color: #fff; }
+        .btn-adicionar:hover { filter: brightness(1.2); }
+
+        .btn-remover { background: transparent; border: 1px solid var(--cor-erro); color: #e07070; }
+        .btn-remover:hover { background: rgba(139, 32, 32, 0.2); }
+
+        .btn-sortear { background: transparent; border: 1px solid var(--cor-dourado); color: var(--cor-dourado); }
+        .btn-sortear:hover { background: rgba(212, 160, 23, 0.15); }
+
+        .divisor { height: 1px; background: var(--cor-borda); margin: 4px 0; }
+
+        #notificacao-admin {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-align: center;
+            min-height: 34px;
+        }
+
+        .notif-sucesso { background: rgba(58, 125, 68, 0.2); color: #70c080; border: 1px solid var(--cor-correto); }
+        .notif-erro    { background: rgba(139, 32, 32, 0.2); color: #e07070; border: 1px solid var(--cor-erro); }
+        .notif-vazio   { background: transparent; color: transparent; border: 1px solid transparent; }
+
+        .lista-header { display: flex; justify-content: space-between; align-items: center; }
+
+        #contador-palavras {
+            font-size: 12px;
+            color: var(--cor-texto-suave);
+            background: rgba(212, 160, 23, 0.1);
+            border: 1px solid var(--cor-borda);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .input-busca {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--cor-painel);
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            color: var(--cor-texto);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .input-busca:focus { border-color: var(--cor-dourado); }
+
+        #grade-palavras { display: flex; flex-wrap: wrap; gap: 6px; align-content: flex-start; }
+
+        .chip-palavra {
+            background: var(--cor-painel);
+            border: 1px solid var(--cor-borda);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--cor-texto);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-transform: uppercase;
+        }
+
+        .chip-palavra:hover { border-color: var(--cor-dourado); color: var(--cor-dourado); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--cor-fundo); }
+        ::-webkit-scrollbar-thumb { background: var(--cor-borda); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cor-dourado); }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
+        <span class="admin-titulo">⚡ Grimório de Palavras — Admin</span>
+        <button class="btn-fechar-admin" onclick="fecharAdmin()">✕</button>
+    </div>
+
+    <div class="admin-corpo">
+
+        <!-- PAINEL DE CONTROLES -->
+        <div class="painel-controles">
+
+            <p class="secao-label">✦ Adicionar ao Grimório</p>
+            <input type="text" id="input-adicionar" class="input-palavra" placeholder="PALAVRA" maxlength="15">
+            <button class="btn-admin btn-adicionar" onclick="adicionarPalavra()">+ Inscrever Feitiço</button>
+
+            <div class="divisor"></div>
+
+            <p class="secao-label">✦ Remover do Grimório</p>
+            <input type="text" id="input-remover" class="input-palavra" placeholder="PALAVRA" maxlength="15">
+            <button class="btn-admin btn-remover" onclick="removerPalavra()">− Banir Feitiço</button>
+
+            <div class="divisor"></div>
+
+            <p class="secao-label">✦ Palavra do Dia</p>
+            <button class="btn-admin btn-sortear" onclick="sortearNova()">🔮 Sortear Nova Palavra</button>
+
+            <div id="notificacao-admin" class="notif-vazio"></div>
+        </div>
+
+        <!-- PAINEL DE LISTA DE PALAVRAS -->
+        <div class="painel-lista">
+
+            <div class="lista-header">
+                <p class="secao-label" style="margin:0;">✦ Palavras cadastradas</p>
+                <span id="contador-palavras">0 palavras</span>
+            </div>
+
+            <input type="text" id="input-busca" class="input-busca" placeholder="🔍 Buscar palavra..." oninput="filtrarPalavras()">
+
+            <div id="grade-palavras"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * admin.html — Script interno do painel administrativo
+         * Comunica-se com o script.js pai via postMessage.
+         */
+
+        let listaPalavrasCompleta = []; // Cache completo das palavras carregadas
+
+        function carregarLista(lista) {
+            listaPalavrasCompleta = lista || [];
+            renderizarGrade(listaPalavrasCompleta);
+            document.getElementById('contador-palavras').textContent = listaPalavrasCompleta.length + " palavras";
+        }
+
+        function renderizarGrade(lista) {
+            const grade = document.getElementById('grade-palavras');
+            grade.innerHTML = '';
+            lista.forEach(p => {
+                const chip = document.createElement('div');
+                chip.className = 'chip-palavra';
+                chip.textContent = p.toUpperCase();
+                chip.addEventListener('click', () => {
+                    document.getElementById('input-remover').value = p.toUpperCase();
+                });
+                grade.appendChild(chip);
+            });
+        }
+
+        function filtrarPalavras() {
+            const termo = document.getElementById('input-busca').value.toUpperCase();
+            const filtradas = listaPalavrasCompleta.filter(p => p.toUpperCase().includes(termo));
+            renderizarGrade(filtradas);
+        }
+
+        function adicionarPalavra() {
+            const palavra = document.getElementById('input-adicionar').value.trim();
+            if (!palavra) { mostrarNotificacao(false, "Digite uma palavra primeiro!"); return; }
+            window.parent.postMessage({ action: 'adminAdicionar', palavra: palavra }, '*');
+            document.getElementById('input-adicionar').value = '';
+        }
+
+        function removerPalavra() {
+            const palavra = document.getElementById('input-remover').value.trim();
+            if (!palavra) { mostrarNotificacao(false, "Digite ou selecione uma palavra!"); return; }
+            window.parent.postMessage({ action: 'adminRemover', palavra: palavra }, '*');
+            document.getElementById('input-remover').value = '';
+        }
+
+        function sortearNova() {
+            window.parent.postMessage({ action: 'adminSortear' }, '*');
+        }
+
+        function fecharAdmin() {
+            window.parent.postMessage({ action: 'fecharAdmin' }, '*');
+        }
+
+        function mostrarNotificacao(sucesso, mensagem) {
+            const el = document.getElementById('notificacao-admin');
+            el.textContent = mensagem;
+            el.className = sucesso ? 'notif-sucesso' : 'notif-erro';
+            clearTimeout(window._notifTimeout);
+            window._notifTimeout = setTimeout(() => {
+                el.className = 'notif-vazio';
+                el.textContent = '';
+            }, 3000);
+        }
+
+        window.addEventListener('message', function(event) {
+            const dados = event.data || {};
+            if (dados.action === 'carregarLista') {
+                carregarLista(dados.lista);
+            } else if (dados.action === 'notificacao') {
+                mostrarNotificacao(dados.sucesso, dados.mensagem);
+            }
+        });
+    </script>
+</body>
+</html>

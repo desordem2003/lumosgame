@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumos Termo — Demo</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { background:#0d0a1a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext y='30' font-size='30' fill='%23ffffff08'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E"); }
+        .demo-aviso{position:fixed;top:10px;left:50%;transform:translateX(-50%);color:#a89070;font:12px Arial;letter-spacing:1px;z-index:5;background:#1a1225;border:1px solid #3d2b5e;padding:6px 14px;border-radius:20px}
+    </style>
+</head>
+<body>
+    <div class="demo-aviso">PRÉVIA da interface NUI — palavra de teste: HARRY</div>
+    <div id="jogo-container" class="oculto">
+        <div class="cabecalho">
+            <div class="logo-area">
+                <span class="logo-icone">⚡</span>
+                <h1 class="logo-texto">LUMOS <span>TERMO</span></h1>
+            </div>
+            <button id="btn-fechar" class="btn-fechar" onclick="fecharJogo()">✕</button>
+        </div>
+        <p class="subtitulo">Adivinhe a palavra do Mundo Bruxo</p>
+        <div id="mensagem-status" class="mensagem-status oculto"></div>
+        <div id="tabuleiro" class="tabuleiro"></div>
+        <div id="teclado" class="teclado">
+            <div class="linha-teclado" id="linha-teclado-1"></div>
+            <div class="linha-teclado" id="linha-teclado-2"></div>
+            <div class="linha-teclado" id="linha-teclado-3"></div>
+        </div>
+        <div id="tela-resultado" class="tela-resultado oculto">
+            <div class="resultado-conteudo">
+                <div id="resultado-icone" class="resultado-icone"></div>
+                <h2 id="resultado-titulo" class="resultado-titulo"></h2>
+                <p id="resultado-mensagem"></p>
+                <p id="resultado-palavra" class="resultado-palavra-revelada"></p>
+                <button class="btn-jogar-novamente" onclick="reiniciarJogo()">🔮 Jogar Novamente</button>
+                <button class="btn-fechar-resultado" onclick="fecharJogo()">Sair</button>
+            </div>
+        </div>
+    </div>
+    <div id="admin-container" class="oculto">
+        <iframe id="admin-iframe" src="admin.html" frameborder="0"></iframe>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        /* Mock do FiveM: simula o servidor Lua para que a prévia seja jogável no navegador. */
+        const BANCO = ["harry","hagrid","draco","lumos","accio","snitch","nimbus","corvinal"];
+        let alvo = "HARRY";
+
+        function novaPalavra(){ alvo = BANCO[Math.floor(Math.random()*BANCO.length)].toUpperCase(); }
+
+        /* Sobrescreve o nuiPost do script.js para simular o Lua localmente */
+        window.nuiPost = function(callback, body){
+            setTimeout(()=>tratar(callback, body || {}), 30);
+            return Promise.resolve();
+        };
+
+        function tratar(cb, body){
+            if(cb === 'enviarTentativa'){
+                const t = (body.palavra||"").toUpperCase();
+                if(!BANCO.map(p=>p.toUpperCase()).includes(t)){
+                    window.postMessage({action:'mostrarResultado', resultado:null, status:'invalida'}, '*');
+                    return;
+                }
+                const res = [];
+                for(let i=0;i<t.length;i++){
+                    if(t[i]===alvo[i]) res[i]='correto';
+                    else if(alvo.includes(t[i])) res[i]='presente';
+                    else res[i]='ausente';
+                }
+                const status = (t===alvo) ? 'ganhou' : 'continua';
+                window.postMessage({action:'mostrarResultado', resultado:res, status}, '*');
+            } else if(cb === 'revelarPalavra'){
+                window.postMessage({action:'revelarPalavra', palavra:alvo}, '*');
+            } else if(cb === 'reiniciarJogo'){
+                novaPalavra();
+                window.postMessage({action:'configurarTabuleiro', tamanho:alvo.length}, '*');
+            }
+        }
+
+        /* Inicia a prévia automaticamente */
+        window.postMessage({action:'abrirJogo'}, '*');
+        window.postMessage({action:'configurarTabuleiro', tamanho:alvo.length}, '*');
+    </script>
+</body>
+</html>

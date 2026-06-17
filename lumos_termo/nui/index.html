@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumos Termo</title>
+    <link rel="stylesheet" href="style.css">
+    <!--
+        index.html — Interface principal do jogo Lumos Termo.
+        Toda a estrutura do tabuleiro, teclado e tela de resultado
+        são renderizados aqui via JavaScript.
+    -->
+</head>
+<body>
+    <!-- Container principal do jogo — oculto por padrão -->
+    <div id="jogo-container" class="oculto">
+
+        <!-- Cabeçalho com logo e botão fechar -->
+        <div class="cabecalho">
+            <div class="logo-area">
+                <span class="logo-icone">⚡</span>
+                <h1 class="logo-texto">LUMOS <span>TERMO</span></h1>
+            </div>
+            <button id="btn-fechar" class="btn-fechar" onclick="fecharJogo()">✕</button>
+        </div>
+
+        <!-- Subtítulo temático -->
+        <p class="subtitulo">Adivinhe a palavra do Mundo Bruxo</p>
+
+        <!-- Mensagem de status (palavra inválida, erro, etc.) -->
+        <div id="mensagem-status" class="mensagem-status oculto"></div>
+
+        <!-- Tabuleiro de tentativas — gerado dinamicamente via JS -->
+        <div id="tabuleiro" class="tabuleiro"></div>
+
+        <!-- Teclado virtual com layout QWERTY adaptado ao português -->
+        <div id="teclado" class="teclado">
+            <div class="linha-teclado" id="linha-teclado-1"></div>
+            <div class="linha-teclado" id="linha-teclado-2"></div>
+            <div class="linha-teclado" id="linha-teclado-3"></div>
+        </div>
+
+        <!-- Tela de fim de jogo (vitória ou derrota) -->
+        <div id="tela-resultado" class="tela-resultado oculto">
+            <div class="resultado-conteudo">
+                <div id="resultado-icone" class="resultado-icone"></div>
+                <h2 id="resultado-titulo" class="resultado-titulo"></h2>
+                <p id="resultado-mensagem"></p>
+                <p id="resultado-palavra" class="resultado-palavra-revelada"></p>
+                <button class="btn-jogar-novamente" onclick="reiniciarJogo()">
+                    🔮 Jogar Novamente
+                </button>
+                <button class="btn-fechar-resultado" onclick="fecharJogo()">
+                    Sair
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container do Painel Admin — oculto por padrão -->
+    <div id="admin-container" class="oculto">
+        <!-- O painel admin é carregado em admin.html via iframe para separação de contexto -->
+        <iframe id="admin-iframe" src="admin.html" frameborder="0"></iframe>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

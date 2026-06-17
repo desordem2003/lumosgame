@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumos Admin — Demo</title>
+    <style>
+        :root{ --cor-fundo:#0d0a1a; --cor-dourado:#d4a017; --cor-borda:#3d2b5e; --cor-texto-suave:#a89070; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            background:#0d0a1a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext y='30' font-size='30' fill='%23ffffff08'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E");
+            height:100vh; display:flex; align-items:center; justify-content:center; font-family:Arial,sans-serif;
+        }
+        .demo-aviso{position:fixed;top:10px;left:50%;transform:translateX(-50%);color:#a89070;font-size:12px;letter-spacing:1px;background:#1a1225;border:1px solid #3d2b5e;padding:6px 14px;border-radius:20px;z-index:5}
+        #admin-container{
+            width:700px; height:560px; border:2px solid var(--cor-dourado); border-radius:16px;
+            overflow:hidden; box-shadow:0 0 60px rgba(212,160,23,0.3);
+        }
+        #admin-iframe{width:100%;height:100%;border:none;}
+    </style>
+</head>
+<body>
+    <div class="demo-aviso">PRÉVIA do painel admin — alterações ficam apenas nesta sessão de teste</div>
+    <div id="admin-container">
+        <iframe id="admin-iframe" src="/termo/admin.html" frameborder="0"></iframe>
+    </div>
+
+    <script>
+        /* Servidor Lua simulado: mantém o banco de palavras em memória e responde
+           às ações do painel admin (adicionar / remover / sortear) só para a prévia. */
+        let palavras = [
+            "harry","hagrid","dumbledore","severo","minerva","neville","draco","luna",
+            "voldemort","horcrux","patrono","expecto","avada","kedavra","lumos","accio",
+            "alohomora","azkaban","dementor","grifinorio","sonserina","corvinal","lufalufa",
+            "ollivander","fawkes","basilisco","dobby","kreacher","quidditch","snitch",
+            "bludger","nimbus","firebolt","hogwarts","bruxo","muggle","varinha","feitico",
+            "vassoura","coruja","trasgo","salao","camara","segredo","calice","magia"
+        ];
+        let palavraAtual = "HARRY";
+
+        const iframe = document.getElementById('admin-iframe');
+
+        /** Envia a lista atual para o painel renderizar */
+        function enviarLista(){
+            iframe.contentWindow.postMessage({ action:'carregarLista', lista: palavras }, '*');
+        }
+        /** Envia feedback (sucesso/erro) para o painel */
+        function notificar(sucesso, mensagem){
+            iframe.contentWindow.postMessage({ action:'notificacao', sucesso, mensagem }, '*');
+        }
+        /** Remove espaços do início/fim */
+        function trim(s){ return (s||"").replace(/^\s+|\s+$/g,''); }
+        /** Sorteia nova palavra do banco */
+        function sortear(){
+            const validas = palavras.filter(p => p.length === 5);
+            const fonte = validas.length ? validas : palavras;
+            palavraAtual = fonte[Math.floor(Math.random()*fonte.length)].toUpperCase();
+        }
+
+        iframe.addEventListener('load', enviarLista);
+
+        window.addEventListener('message', function(e){
+            const d = e.data || {};
+            if(d.action === 'adminAdicionar'){
+                const p = trim(d.palavra).toLowerCase();
+                if(!p){ notificar(false, "Palavra inválida!"); return; }
+                if(palavras.includes(p)){ notificar(false, "Palavra já existe no Grimório!"); return; }
+                palavras.push(p);
+                notificar(true, "Palavra adicionada ao Grimório!");
+                enviarLista();
+            } else if(d.action === 'adminRemover'){
+                const p = trim(d.palavra).toLowerCase();
+                const i = palavras.indexOf(p);
+                if(i === -1){ notificar(false, "Palavra não encontrada no Grimório!"); return; }
+                palavras.splice(i,1);
+                if(p.toUpperCase() === palavraAtual) sortear();
+                notificar(true, "Palavra removida do Grimório!");
+                enviarLista();
+            } else if(d.action === 'adminSortear'){
+                sortear();
+                notificar(true, "Nova palavra sorteada com sucesso!");
+            } else if(d.action === 'fecharAdmin'){
+                notificar(true, "Painel fechado (na prévia permanece aberto).");
+            }
+        });
+    </script>
+</body>
+</html>

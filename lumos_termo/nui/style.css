@@ -1,0 +1,316 @@
+/*
+ * style.css — Estilização completa do Lumos Termo
+ * Tema visual inspirado em Harry Potter com paleta dourada, bordô e pergaminho.
+ * Variáveis CSS centralizam as cores e facilitam personalizações futuras.
+ */
+
+/* ---- VARIÁVEIS DE TEMA ----------------------------------------- */
+:root {
+    --cor-fundo         : #0d0a1a;   /* Fundo escuro como o céu de Hogwarts */
+    --cor-fundo-painel  : #1a1225;   /* Fundo dos painéis internos */
+    --cor-borda         : #3d2b5e;   /* Borda roxa mágica */
+    --cor-dourado       : #d4a017;   /* Dourado de Grifinório */
+    --cor-dourado-hover : #f0c030;   /* Dourado mais claro para hover */
+    --cor-texto         : #f5e6c8;   /* Texto cor pergaminho */
+    --cor-texto-suave   : #a89070;   /* Texto secundário */
+    --cor-correto       : #3a7d44;   /* Verde mago — letra correta */
+    --cor-presente      : #b07d1a;   /* Âmbar — letra presente, posição errada */
+    --cor-ausente       : #2d2040;   /* Roxo escuro — letra ausente */
+    --cor-celula        : #1e1535;   /* Fundo da célula vazia */
+    --cor-celula-borda  : #4a3570;   /* Borda da célula vazia */
+    --fonte-titulo      : 'Georgia', serif;
+    --fonte-corpo       : 'Arial', sans-serif;
+}
+
+/* ---- RESET E BASE ---------------------------------------------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: transparent;        /* Transparente para integração com FiveM */
+    font-family: var(--fonte-corpo);
+    overflow: hidden;
+    user-select: none;
+}
+
+.oculto { display: none !important; }
+
+/* ---- CONTAINER PRINCIPAL DO JOGO ------------------------------- */
+#jogo-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--cor-fundo);
+    border: 2px solid var(--cor-dourado);
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 60px rgba(212, 160, 23, 0.3), inset 0 0 40px rgba(13, 10, 26, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+/* ---- CABEÇALHO ------------------------------------------------- */
+.cabecalho {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icone {
+    font-size: 28px;
+    filter: drop-shadow(0 0 8px var(--cor-dourado));
+}
+
+.logo-texto {
+    font-family: var(--fonte-titulo);
+    font-size: 22px;
+    color: var(--cor-texto);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+.logo-texto span {
+    color: var(--cor-dourado);
+}
+
+.btn-fechar {
+    background: transparent;
+    border: 1px solid var(--cor-borda);
+    color: var(--cor-texto-suave);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-fechar:hover {
+    border-color: var(--cor-dourado);
+    color: var(--cor-dourado);
+}
+
+/* ---- SUBTÍTULO ------------------------------------------------- */
+.subtitulo {
+    color: var(--cor-texto-suave);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ---- MENSAGEM DE STATUS --------------------------------------- */
+.mensagem-status {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    transition: opacity 0.3s;
+}
+
+.mensagem-aviso  { background: rgba(176, 125, 26, 0.2);  color: var(--cor-dourado-hover); border: 1px solid var(--cor-presente); }
+.mensagem-erro   { background: rgba(180, 40, 40, 0.2);   color: #e07070; border: 1px solid #8b2020; }
+.mensagem-sucesso{ background: rgba(58, 125, 68, 0.2);   color: #70c080; border: 1px solid var(--cor-correto); }
+
+/* ---- TABULEIRO ------------------------------------------------- */
+.tabuleiro {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.linha-tabuleiro {
+    display: flex;
+    gap: 6px;
+}
+
+/* Cada célula do tabuleiro */
+.celula {
+    width: 56px;
+    height: 56px;
+    border: 2px solid var(--cor-celula-borda);
+    border-radius: 6px;
+    background: var(--cor-celula);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: var(--fonte-titulo);
+    color: var(--cor-texto);
+    transition: border-color 0.2s, transform 0.1s;
+}
+
+.celula.preenchida {
+    border-color: var(--cor-dourado);
+}
+
+/* Estados revelados após validação */
+.estado-correto  { background: var(--cor-correto);  border-color: var(--cor-correto);  color: #fff; }
+.estado-presente { background: var(--cor-presente); border-color: var(--cor-presente); color: #fff; }
+.estado-ausente  { background: var(--cor-ausente);  border-color: var(--cor-ausente);  color: var(--cor-texto-suave); }
+
+/* ---- ANIMAÇÕES ------------------------------------------------- */
+@keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+@keyframes revelar {
+    0%   { transform: rotateX(0deg); }
+    50%  { transform: rotateX(90deg); }
+    100% { transform: rotateX(0deg); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-6px); }
+    40%       { transform: translateX(6px); }
+    60%       { transform: translateX(-4px); }
+    80%       { transform: translateX(4px); }
+}
+
+@keyframes celebrar {
+    0%, 100% { transform: translateY(0); }
+    25%       { transform: translateY(-8px); }
+    75%       { transform: translateY(-4px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, -48%); }
+    to   { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.celula.pop       { animation: pop     0.15s ease; }
+.celula.revelando { animation: revelar 0.5s ease; }
+.linha-tabuleiro.shake    { animation: shake   0.5s ease; }
+.linha-tabuleiro.celebrar { animation: celebrar 0.5s ease; }
+
+/* ---- TECLADO VIRTUAL ------------------------------------------ */
+.teclado {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.linha-teclado {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.tecla {
+    height: 48px;
+    min-width: 36px;
+    padding: 0 10px;
+    background: var(--cor-fundo-painel);
+    border: 1px solid var(--cor-borda);
+    border-radius: 6px;
+    color: var(--cor-texto);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+}
+
+.tecla:hover { background: #2d1f4a; border-color: var(--cor-dourado); }
+.tecla:active { transform: scale(0.93); }
+
+.tecla-enter, .tecla-backspace { min-width: 56px; font-size: 11px; }
+
+.tecla.estado-correto  { background: var(--cor-correto);  border-color: var(--cor-correto);  color: #fff; }
+.tecla.estado-presente { background: var(--cor-presente); border-color: var(--cor-presente); color: #fff; }
+.tecla.estado-ausente  { background: var(--cor-ausente);  border-color: var(--cor-ausente);  color: var(--cor-texto-suave); }
+
+/* ---- TELA DE RESULTADO ---------------------------------------- */
+.tela-resultado {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--cor-fundo);
+    border: 2px solid var(--cor-dourado);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    width: 360px;
+    z-index: 100;
+    box-shadow: 0 0 80px rgba(212, 160, 23, 0.4);
+}
+
+.tela-resultado.fade-in { animation: fadeIn 0.4s ease forwards; }
+
+.resultado-icone  { font-size: 56px; margin-bottom: 12px; }
+.resultado-titulo { font-family: var(--fonte-titulo); color: var(--cor-dourado); font-size: 22px; margin-bottom: 8px; }
+
+.resultado-conteudo p  { color: var(--cor-texto-suave); font-size: 14px; margin-bottom: 6px; }
+
+.resultado-palavra-revelada {
+    font-family: var(--fonte-titulo);
+    font-size: 28px;
+    color: var(--cor-dourado-hover);
+    letter-spacing: 6px;
+    margin: 12px 0 16px;
+}
+
+.btn-jogar-novamente, .btn-fechar-resultado {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.btn-jogar-novamente {
+    background: var(--cor-dourado);
+    border: none;
+    color: #0d0a1a;
+}
+
+.btn-jogar-novamente:hover { background: var(--cor-dourado-hover); }
+
+.btn-fechar-resultado {
+    background: transparent;
+    border: 1px solid var(--cor-borda);
+    color: var(--cor-texto-suave);
+}
+
+.btn-fechar-resultado:hover { border-color: var(--cor-dourado); color: var(--cor-dourado); }
+
+/* ---- PAINEL ADMIN -------------------------------------------- */
+#admin-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 560px;
+    border: 2px solid var(--cor-dourado);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(212, 160, 23, 0.3);
+}
+
+#admin-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
