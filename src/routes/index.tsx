@@ -160,20 +160,20 @@ function TelaJogo({ modo, onVoltar }: { modo: Modo; onVoltar: () => void }) {
   const [celebrarRow, setCelebrarRow] = useState<number | null>(null);
 
   const sortearPalavra = useCallback(() => {
-    // Usa palavras do localStorage filtradas pelo tamanho do modo, ou o banco embutido
-    let lista = cfg.palavras;
+    // Tenta ler o banco v2 (com subcategorias por dificuldade)
     try {
-      const salvas: string[] = JSON.parse(localStorage.getItem("lumos_palavras") || "[]");
-      const filtradas = salvas.filter(p => {
-        const l = p.length;
-        if (modo === "facil")   return l === 5;
-        if (modo === "medio")   return l >= 6 && l <= 7;
-        if (modo === "dificil") return l >= 8;
-        return false;
-      });
-      if (filtradas.length > 0) lista = filtradas;
+      const raw = localStorage.getItem("lumos_banco_v2");
+      if (raw) {
+        const banco = JSON.parse(raw) as { facil: string[]; medio: string[]; dificil: string[] };
+        let lista: string[] = [];
+        if (modo === "facil")   lista = banco.facil;
+        if (modo === "medio")   lista = banco.medio;
+        if (modo === "dificil") lista = banco.dificil;
+        if (lista.length > 0) return lista[Math.floor(Math.random() * lista.length)];
+      }
     } catch { /* ignora */ }
-    return lista[Math.floor(Math.random() * lista.length)];
+    // Fallback: banco embutido
+    return cfg.palavras[Math.floor(Math.random() * cfg.palavras.length)];
   }, [cfg.palavras, modo]);
 
   const initGame = useCallback(() => {
