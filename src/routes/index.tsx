@@ -69,16 +69,17 @@ function calcularResultado(chute: string[], sorteada: string): string[] {
   return resultado;
 }
 
-// ─── TELA DE SELEÇÃO DE MODO ────────────────────────────────────────────────
-function TelaModo({ onSelect }: { onSelect: (m: Modo) => void }) {
+type TipoJogo = "solo" | "duelo";
+
+// ─── TELA 1: SELEÇÃO DE TIPO (SOLO vs DUELO) ────────────────────────────────
+function TelaSelecaoTipo({ onSelect }: { onSelect: (t: TipoJogo) => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div
         className="relative bg-[var(--cor-fundo)] border-2 border-[var(--cor-dourado)] rounded-2xl p-8 w-[440px] max-w-full flex flex-col items-center gap-6"
         style={{ boxShadow: '0 0 60px rgba(212, 160, 23, 0.3), inset 0 0 40px rgba(13, 10, 26, 0.8)' }}
       >
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <span className="text-3xl" style={{ filter: 'drop-shadow(0 0 10px var(--cor-dourado))' }}>⚡</span>
           <h1 className="font-['Georgia'] text-2xl uppercase tracking-[4px]" style={{ color: 'var(--cor-texto)' }}>
             Lumos <span style={{ color: 'var(--cor-dourado)' }}>Termo</span>
@@ -86,10 +87,122 @@ function TelaModo({ onSelect }: { onSelect: (m: Modo) => void }) {
         </div>
 
         <p className="text-[11px] uppercase tracking-[2px] text-center" style={{ color: 'var(--cor-texto-suave)' }}>
-          Escolha sua dificuldade, bruxo
+          Como deseja jogar, bruxo?
         </p>
 
-        <div className="w-full flex flex-col gap-3 mt-2">
+        <div className="w-full flex flex-col gap-4 mt-2">
+          {/* SOLO */}
+          <button
+            onClick={() => onSelect('solo')}
+            className="w-full p-5 rounded-xl border-2 flex items-center gap-4 text-left transition-all duration-200 group cursor-pointer"
+            style={{ background: 'var(--cor-fundo-painel)', borderColor: 'var(--cor-borda)' }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = '#d4a017';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 24px rgba(212,160,23,0.3)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--cor-borda)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+            }}
+          >
+            <span className="text-4xl">🧙</span>
+            <div className="flex-1">
+              <p className="font-bold font-['Georgia'] text-lg" style={{ color: 'var(--cor-dourado)' }}>Solo</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--cor-texto-suave)' }}>Jogue sozinho e teste seus conhecimentos do Mundo Bruxo</p>
+            </div>
+            <span className="text-xl group-hover:translate-x-1 transition-transform" style={{ color: 'var(--cor-texto-suave)' }}>›</span>
+          </button>
+
+          {/* DUELO */}
+          <button
+            onClick={() => onSelect('duelo')}
+            className="w-full p-5 rounded-xl border-2 flex items-center gap-4 text-left transition-all duration-200 group cursor-pointer"
+            style={{ background: 'var(--cor-fundo-painel)', borderColor: 'var(--cor-borda)' }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = '#7b3fbe';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 24px rgba(123,63,190,0.35)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--cor-borda)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+            }}
+          >
+            <span className="text-4xl">⚔️</span>
+            <div className="flex-1">
+              <p className="font-bold font-['Georgia'] text-lg" style={{ color: '#c084fc' }}>Duelo Bruxo</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--cor-texto-suave)' }}>Dispute com outros bruxos do servidor — quem adivinha em menos tentativas vence!</p>
+            </div>
+            <span className="text-xl group-hover:translate-x-1 transition-transform" style={{ color: 'var(--cor-texto-suave)' }}>›</span>
+          </button>
+        </div>
+
+        <Link
+          to="/admin"
+          className="mt-2 text-xs tracking-wider flex items-center gap-1.5 transition-colors"
+          style={{ color: 'var(--cor-texto-suave)' }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--cor-dourado)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--cor-texto-suave)')}
+        >
+          ⚙️ Painel Admin
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── TELA 2: SELEÇÃO DE DIFICULDADE ─────────────────────────────────────────
+function TelaModo({
+  tipoJogo,
+  onSelect,
+  onVoltar,
+}: {
+  tipoJogo: TipoJogo;
+  onSelect: (m: Modo) => void;
+  onVoltar: () => void;
+}) {
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div
+        className="relative bg-[var(--cor-fundo)] border-2 border-[var(--cor-dourado)] rounded-2xl p-8 w-[440px] max-w-full flex flex-col items-center gap-6"
+        style={{ boxShadow: '0 0 60px rgba(212, 160, 23, 0.3), inset 0 0 40px rgba(13, 10, 26, 0.8)' }}
+      >
+        {/* Header com badge do tipo */}
+        <div className="w-full flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" style={{ filter: 'drop-shadow(0 0 8px var(--cor-dourado))' }}>⚡</span>
+            <h1 className="font-['Georgia'] text-xl uppercase tracking-[4px]" style={{ color: 'var(--cor-texto)' }}>
+              Lumos <span style={{ color: 'var(--cor-dourado)' }}>Termo</span>
+            </h1>
+          </div>
+          <button
+            onClick={onVoltar}
+            className="text-xs flex items-center gap-1 px-3 py-1.5 rounded-md border transition-all cursor-pointer"
+            style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)', background: 'var(--cor-fundo-painel)' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--cor-dourado)'; e.currentTarget.style.color = 'var(--cor-dourado)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--cor-borda)'; e.currentTarget.style.color = 'var(--cor-texto-suave)'; }}
+          >
+            ← Voltar
+          </button>
+        </div>
+
+        {/* Badge do tipo selecionado */}
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full border"
+          style={{
+            borderColor: tipoJogo === 'solo' ? 'var(--cor-dourado)' : '#7b3fbe',
+            background: tipoJogo === 'solo' ? 'rgba(212,160,23,0.1)' : 'rgba(123,63,190,0.1)',
+          }}>
+          <span>{tipoJogo === 'solo' ? '🧙' : '⚔️'}</span>
+          <span className="text-xs font-bold uppercase tracking-widest"
+            style={{ color: tipoJogo === 'solo' ? 'var(--cor-dourado)' : '#c084fc' }}>
+            {tipoJogo === 'solo' ? 'Modo Solo' : 'Duelo Bruxo'}
+          </span>
+        </div>
+
+        <p className="text-[11px] uppercase tracking-[2px] text-center" style={{ color: 'var(--cor-texto-suave)' }}>
+          Escolha a dificuldade
+        </p>
+
+        <div className="w-full flex flex-col gap-3">
           {(Object.keys(MODOS) as Modo[]).map((modo) => {
             const { label, emoji, desc } = MODOS[modo];
             const cores = {
@@ -97,16 +210,12 @@ function TelaModo({ onSelect }: { onSelect: (m: Modo) => void }) {
               medio:   { ring: '#b07d1a', glow: 'rgba(176,125,26,0.3)', text: '#f0c030' },
               dificil: { ring: '#8b2020', glow: 'rgba(139,32,32,0.3)',  text: '#e07070' },
             }[modo];
-
             return (
               <button
                 key={modo}
                 onClick={() => onSelect(modo)}
                 className="w-full p-4 rounded-xl border-2 flex items-center gap-4 text-left transition-all duration-200 group cursor-pointer"
-                style={{
-                  background: 'var(--cor-fundo-painel)',
-                  borderColor: 'var(--cor-borda)',
-                }}
+                style={{ background: 'var(--cor-fundo-painel)', borderColor: 'var(--cor-borda)' }}
                 onMouseEnter={e => {
                   (e.currentTarget as HTMLButtonElement).style.borderColor = cores.ring;
                   (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 20px ${cores.glow}`;
@@ -126,16 +235,167 @@ function TelaModo({ onSelect }: { onSelect: (m: Modo) => void }) {
             );
           })}
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <Link
-          to="/admin"
-          className="mt-2 text-xs tracking-wider flex items-center gap-1.5 transition-colors"
-          style={{ color: 'var(--cor-texto-suave)' }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--cor-dourado)')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'var(--cor-texto-suave)')}
-        >
-          ⚙️ Painel Admin
-        </Link>
+// ─── TELA LOBBY DUELO ───────────────────────────────────────────────────────
+function TelaLobbyDuelo({ modo, onVoltar }: { modo: Modo; onVoltar: () => void }) {
+  const [tela, setTela] = useState<'opcao' | 'criar' | 'entrar'>('opcao');
+  const [codigoInput, setCodigoInput] = useState('');
+  const [codigoGerado] = useState(() => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let c = '';
+    for (let i = 0; i < 4; i++) c += chars[Math.floor(Math.random() * chars.length)];
+    return c;
+  });
+  const [copiado, setCopiado] = useState(false);
+
+  const copiarCodigo = () => {
+    navigator.clipboard.writeText(codigoGerado).then(() => {
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    });
+  };
+
+  const cfg = MODOS[modo];
+  const badgeCores = {
+    facil:   { border: '#3a7d44', text: '#70c080', bg: 'rgba(58,125,68,0.1)' },
+    medio:   { border: '#b07d1a', text: '#f0c030', bg: 'rgba(176,125,26,0.1)' },
+    dificil: { border: '#8b2020', text: '#e07070', bg: 'rgba(139,32,32,0.1)' },
+  }[modo];
+
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div
+        className="relative bg-[var(--cor-fundo)] border-2 rounded-2xl p-8 w-[460px] max-w-full flex flex-col items-center gap-6"
+        style={{ borderColor: '#7b3fbe', boxShadow: '0 0 60px rgba(123,63,190,0.3), inset 0 0 40px rgba(13,10,26,0.8)' }}
+      >
+        {/* Header */}
+        <div className="w-full flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">⚔️</span>
+            <h1 className="font-['Georgia'] text-xl uppercase tracking-[3px]" style={{ color: 'var(--cor-texto)' }}>
+              Duelo <span style={{ color: '#c084fc' }}>Bruxo</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold px-2.5 py-1 rounded-full border uppercase tracking-widest"
+              style={{ background: badgeCores.bg, borderColor: badgeCores.border, color: badgeCores.text }}>
+              {cfg.emoji} {cfg.label}
+            </span>
+            <button onClick={onVoltar}
+              className="text-xs px-3 py-1.5 rounded-md border transition-all cursor-pointer"
+              style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)', background: 'var(--cor-fundo-painel)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#c084fc'; e.currentTarget.style.color = '#c084fc'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--cor-borda)'; e.currentTarget.style.color = 'var(--cor-texto-suave)'; }}
+            >← Voltar</button>
+          </div>
+        </div>
+
+        {tela === 'opcao' && (
+          <div className="w-full flex flex-col gap-4">
+            <p className="text-[11px] uppercase tracking-[2px] text-center mb-2" style={{ color: 'var(--cor-texto-suave)' }}>
+              Como deseja entrar?
+            </p>
+            <button onClick={() => setTela('criar')}
+              className="w-full p-5 rounded-xl border-2 flex items-center gap-4 text-left transition-all group cursor-pointer"
+              style={{ background: 'var(--cor-fundo-painel)', borderColor: 'var(--cor-borda)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#7b3fbe'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(123,63,190,0.3)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--cor-borda)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'; }}
+            >
+              <span className="text-3xl">🏰</span>
+              <div className="flex-1">
+                <p className="font-bold font-['Georgia'] text-base" style={{ color: '#c084fc' }}>Criar Sala</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--cor-texto-suave)' }}>Gere um código e convide seus amigos</p>
+              </div>
+              <span className="text-lg group-hover:translate-x-1 transition-transform" style={{ color: 'var(--cor-texto-suave)' }}>›</span>
+            </button>
+            <button onClick={() => setTela('entrar')}
+              className="w-full p-5 rounded-xl border-2 flex items-center gap-4 text-left transition-all group cursor-pointer"
+              style={{ background: 'var(--cor-fundo-painel)', borderColor: 'var(--cor-borda)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = '#7b3fbe'; (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(123,63,190,0.3)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--cor-borda)'; (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'; }}
+            >
+              <span className="text-3xl">🗺️</span>
+              <div className="flex-1">
+                <p className="font-bold font-['Georgia'] text-base" style={{ color: '#c084fc' }}>Entrar na Sala</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--cor-texto-suave)' }}>Informe o código de 4 letras de um amigo</p>
+              </div>
+              <span className="text-lg group-hover:translate-x-1 transition-transform" style={{ color: 'var(--cor-texto-suave)' }}>›</span>
+            </button>
+          </div>
+        )}
+
+        {tela === 'criar' && (
+          <div className="w-full flex flex-col items-center gap-5">
+            <p className="text-[11px] uppercase tracking-[2px] text-center" style={{ color: 'var(--cor-texto-suave)' }}>
+              Compartilhe este código com seus amigos
+            </p>
+            <div
+              className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl border-2 cursor-pointer select-all transition-all"
+              style={{ borderColor: '#7b3fbe', background: 'rgba(123,63,190,0.1)' }}
+              onClick={copiarCodigo}
+            >
+              <span className="font-['Georgia'] text-4xl font-bold tracking-[12px]" style={{ color: '#c084fc' }}>
+                {codigoGerado}
+              </span>
+            </div>
+            <button onClick={copiarCodigo}
+              className="text-xs px-4 py-2 rounded-md border transition-all cursor-pointer"
+              style={{ borderColor: copiado ? '#7b3fbe' : 'var(--cor-borda)', color: copiado ? '#c084fc' : 'var(--cor-texto-suave)', background: copiado ? 'rgba(123,63,190,0.1)' : 'transparent' }}
+            >
+              {copiado ? '✓ Código copiado!' : '📋 Copiar código'}
+            </button>
+            <div className="w-full border rounded-lg p-4 text-center" style={{ borderColor: 'var(--cor-borda)', background: 'var(--cor-fundo-painel)' }}>
+              <p className="text-xs mb-1" style={{ color: 'var(--cor-texto-suave)' }}>No FiveM, use o comando:</p>
+              <p className="font-mono text-sm font-bold" style={{ color: '#c084fc' }}>/termo_duelo</p>
+              <p className="text-xs mt-2" style={{ color: 'var(--cor-texto-suave)' }}>O servidor irá gerar o código real para seus amigos entrarem com:</p>
+              <p className="font-mono text-sm font-bold mt-1" style={{ color: '#c084fc' }}>/termo_duelo {codigoGerado}</p>
+            </div>
+            <button onClick={() => setTela('opcao')}
+              className="text-xs px-4 py-2 rounded-md border transition-all cursor-pointer"
+              style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)', background: 'transparent' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#c084fc'; e.currentTarget.style.color = '#c084fc'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--cor-borda)'; e.currentTarget.style.color = 'var(--cor-texto-suave)'; }}
+            >← Voltar</button>
+          </div>
+        )}
+
+        {tela === 'entrar' && (
+          <div className="w-full flex flex-col items-center gap-4">
+            <p className="text-[11px] uppercase tracking-[2px] text-center" style={{ color: 'var(--cor-texto-suave)' }}>
+              Digite o código da sala
+            </p>
+            <input
+              type="text"
+              maxLength={4}
+              value={codigoInput}
+              onChange={e => setCodigoInput(e.target.value.toUpperCase())}
+              className="w-full text-center p-4 rounded-xl border-2 outline-none transition-colors text-3xl tracking-[12px] font-['Georgia'] font-bold uppercase"
+              style={{ background: 'var(--cor-fundo-painel)', borderColor: codigoInput.length === 4 ? '#7b3fbe' : 'var(--cor-borda)', color: '#c084fc' }}
+              placeholder="XKPQ"
+            />
+            <div className="w-full border rounded-lg p-4 text-center" style={{ borderColor: 'var(--cor-borda)', background: 'var(--cor-fundo-painel)' }}>
+              <p className="text-xs" style={{ color: 'var(--cor-texto-suave)' }}>No FiveM, use o comando:</p>
+              <p className="font-mono text-sm font-bold mt-1" style={{ color: '#c084fc' }}>/termo_duelo {codigoInput || 'CÓDIGO'}</p>
+            </div>
+            <div className="flex gap-2 w-full">
+              <button onClick={() => setTela('opcao')}
+                className="flex-1 py-2.5 rounded-md border text-sm transition-all cursor-pointer"
+                style={{ borderColor: 'var(--cor-borda)', color: 'var(--cor-texto-suave)', background: 'transparent' }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = '#c084fc'; e.currentTarget.style.color = '#c084fc'; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--cor-borda)'; e.currentTarget.style.color = 'var(--cor-texto-suave)'; }}
+              >← Voltar</button>
+              <button
+                disabled={codigoInput.length !== 4}
+                className="flex-1 py-2.5 rounded-md font-bold text-sm transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ background: codigoInput.length === 4 ? '#7b3fbe' : 'var(--cor-fundo-painel)', color: '#fff', border: 'none' }}
+              >Entrar na Sala ›</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -431,11 +691,40 @@ function TelaJogo({ modo, onVoltar }: { modo: Modo; onVoltar: () => void }) {
 
 // ─── COMPONENTE RAIZ ─────────────────────────────────────────────────────────
 function Index() {
+  const [tipoJogo, setTipoJogo] = useState<TipoJogo | null>(null);
   const [modoSelecionado, setModoSelecionado] = useState<Modo | null>(null);
 
-  if (!modoSelecionado) {
-    return <TelaModo onSelect={setModoSelecionado} />;
+  // Tela 1: Tipo de jogo
+  if (!tipoJogo) {
+    return <TelaSelecaoTipo onSelect={setTipoJogo} />;
   }
 
-  return <TelaJogo modo={modoSelecionado} onVoltar={() => setModoSelecionado(null)} />;
+  // Tela 2: Dificuldade
+  if (!modoSelecionado) {
+    return (
+      <TelaModo
+        tipoJogo={tipoJogo}
+        onSelect={setModoSelecionado}
+        onVoltar={() => setTipoJogo(null)}
+      />
+    );
+  }
+
+  // Tela 3a: Lobby de Duelo
+  if (tipoJogo === 'duelo') {
+    return (
+      <TelaLobbyDuelo
+        modo={modoSelecionado}
+        onVoltar={() => setModoSelecionado(null)}
+      />
+    );
+  }
+
+  // Tela 3b: Jogo Solo
+  return (
+    <TelaJogo
+      modo={modoSelecionado}
+      onVoltar={() => setModoSelecionado(null)}
+    />
+  );
 }
